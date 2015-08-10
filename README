@@ -3,5 +3,5 @@ seq is a utility for performing live electronic music similar in concept to seq2
 I've just started this, there is nothing of value here yet.
 
 Dependencies:
-- asound
+- libasound2
 - ncurses
