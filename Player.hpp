@@ -2,6 +2,7 @@
 #include <cmath>
 #include <thread>
 #include <chrono>
+#include <vector>
 #include <list>
 
 #include "Track.hpp"
@@ -9,37 +10,48 @@
 class Player
 {
 private:
-  double BPM;
+  double BPM = 120.0;
   bool playing = false;
-  list<reference_wrapper<Track>> tracks;
-  list<reference_wrapper<MidiDevice>> clock_devices;
+  vector<Track> tracks;
+  list<shared_ptr<MidiDevice>> clock_devices;
  
 public:
-  Player(double b) : BPM{b}
+  void addClockDevice(shared_ptr<MidiDevice> device)
   {
+    clock_devices.push_back(device);
   }
 
-  void addClockDevice(MidiDevice &device)
+  void addTrack(Track track)
   {
-    clock_devices.push_back(ref(device));
+    tracks.push_back(track);
   }
 
-  void addTrack(Track &track)
+  Track &getTrack(int index)
   {
-    tracks.push_back(ref(track));
+    return tracks[index];
+  }
+
+  int getTrackCount()
+  {
+    return tracks.size();
   }
 
   double getBPM()
   {
     return BPM;
-  }  
+  }
+
+  void setBPM(double bpm)
+  {
+    BPM = bpm;
+  }
 
   void start()
   {
     for ( Track &track : tracks)
       track.start();
-    for ( MidiDevice &device : clock_devices )
-      device.write( StartEvent{} );
+    for ( shared_ptr<MidiDevice> device : clock_devices )
+      (*device).write( StartEvent{} );
 
     playing = true;
     thread t(Player::process, ref(*this));
@@ -49,8 +61,8 @@ public:
   void stop()
   {
     playing = false;
-    for ( MidiDevice &device : clock_devices )
-      device.write( StopEvent{} );
+    for ( shared_ptr<MidiDevice> device : clock_devices )
+      (*device).write( StopEvent{} );
   }
 
   static void process(Player &player)
@@ -67,8 +79,8 @@ public:
 
       for ( Track &track : player.tracks)
         track.tick();
-      for ( MidiDevice &device : player.clock_devices )
-        device.write( ClockEvent{} );
+      for ( shared_ptr<MidiDevice> device : player.clock_devices )
+        (*device).write( ClockEvent{} );
 
       this_thread::sleep_for(tick_time + start_time -
                              chrono::high_resolution_clock::now());

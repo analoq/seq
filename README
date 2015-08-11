@@ -5,3 +5,4 @@ I've just started this, there is nothing of value here yet.
 Dependencies:
 - libasound2
 - ncurses
+- libjsoncpp

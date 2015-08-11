@@ -59,11 +59,13 @@ private:
 
 
 public:
-  MidiDevice(string device_id)
+  string device_id;
+
+  MidiDevice(string id) : device_id(id)
   {
     int err {snd_rawmidi_open(&handle_in, &handle_out, device_id.c_str(), 0)};
     if ( err )
-      throw runtime_error{"snd_rawmidi_open failed"};
+      throw runtime_error{"snd_rawmidi_open failed for " + device_id};
   }
 
   ~MidiDevice()
@@ -133,17 +135,17 @@ public:
     if (typeid(event) == typeid(NoteOnEvent))
     {
       const NoteOnEvent &note_on = static_cast<const NoteOnEvent &>(event);
-      write(0, note_on);
+      write(channel, note_on);
     }
     else if (typeid(event) == typeid(NoteOffEvent))
     {
       const NoteOffEvent &note_off = static_cast<const NoteOffEvent &>(event);
-      write(0, note_off);
+      write(channel, note_off);
     }
     else if (typeid(event) == typeid(ControlEvent))
     {
       const ControlEvent &control = static_cast<const ControlEvent &>(event);
-      write(0, control);
+      write(channel, control);
     }
   }
 };

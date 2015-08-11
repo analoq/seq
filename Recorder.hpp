@@ -1,14 +1,20 @@
 #pragma once
+#include <memory>
 #include "Track.hpp"
 #include "Clip.hpp"
 
 class Recorder
 {
 private:
-  Clip *active_clip = nullptr;
-  Track *active_track = nullptr;
+  Clip *active_clip;
+  Track *active_track;
 
+  list<shared_ptr<MidiDevice>> devices;
 public:
+  Recorder() : active_clip{nullptr}, active_track{nullptr}
+  {
+  }
+
   Clip *getClip()
   {
     return active_clip;
@@ -24,9 +30,9 @@ public:
     active_clip = nullptr;
   }
 
-  void setTrack(Track &track)
+  void setTrack(Track *track)
   {
-    active_track = &track;
+    active_track = track;
   }
 
   Track *getTrack()
@@ -34,17 +40,25 @@ public:
     return active_track;
   }
 
-  void addDevice(MidiDevice &device)
+  void addDevice(shared_ptr<MidiDevice> device)
   {
-    thread t(Recorder::read, ref(*this), ref(device));
-    t.detach();
+    devices.push_back(device);
   }
 
-  static void read(Recorder &recorder, MidiDevice &device)
+  void start()
+  {
+    for ( shared_ptr<MidiDevice> device : devices )
+    {
+      thread t(Recorder::read, ref(*this), device);
+      t.detach();
+    }
+  }
+
+  static void read(Recorder &recorder, shared_ptr<MidiDevice> device)
   {
     while ( true )
     {
-      shared_ptr<Event> event { device.read() };
+      shared_ptr<Event> event { (*device).read() };
 
       if ( recorder.active_track != nullptr )
         recorder.active_track->send(*event);

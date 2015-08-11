@@ -107,13 +107,13 @@ public:
     it = events.begin();
   }
 
-  void tick(MidiDevice &device, int channel)
+  void tick(shared_ptr<MidiDevice> device, int channel)
   {
     if ( state == ON || state == TURNING_OFF )
     {
       while ( it != events.end() && time >= (*it).time )
       {
-        device.write(channel, *(*it).event);
+        (*device).write(channel, *(*it).event);
         it ++;
       }
     }

@@ -4,28 +4,75 @@
 #include "Player.hpp"
 #include "Recorder.hpp"
 
+#include <fstream>
 #include <vector>
+#include <map>
+#include <jsoncpp/json/reader.h>
+
+using namespace std;
 
 class Session
 {
-private:
-  MidiDevice device{"hw:3,0,0"};
-  MidiDevice clock_device{"hw:3,0,8"};
-
 public:
-  Track track{device, 0, "1 (Piano)"};
-  Player player {105.0};
+  Player player;
   Recorder recorder;
 
-  Session()
+  Session(Player &p, Recorder &r) : player{p}, recorder{r}
   {
-    track.setPatch(63, 0, 1);
+    recorder.setTrack(&player.getTrack(1));
+  }
 
-    player.addClockDevice(clock_device);
-    player.addTrack(track);
+  static Session jsonFactory(string path)
+  {
+    // parse json
+    Json::Value root;
+    ifstream doc {path, ifstream::binary };
+    doc >> root;
 
-    recorder.addDevice(device);
-    recorder.setTrack(track);
+    // get devices
+    map<string, shared_ptr<MidiDevice>> devices;
+    for ( Json::Value node : root["devices"] )
+    {
+      string device_name { node.asString() };
+      devices[device_name] = shared_ptr<MidiDevice>(new MidiDevice {device_name});
+    }
+
+    // get input devices
+    Recorder recorder;
+    for ( Json::Value node : root["input_devices"] )
+    {
+      string device_name { node.asString() };
+      recorder.addDevice( devices[device_name] );
+    }
+
+    // get clock devices
+    Player player;
+    for ( Json::Value node : root["clock_devices"] )
+    {
+      string device_name { node.asString() };
+      player.addClockDevice( devices[device_name] );
+    }
+
+    // get tempo
+    double tempo = root["tempo"].asDouble();
+    player.setBPM(tempo);
+
+    // get tracks
+    for ( Json::Value node : root["tracks"] )
+    {
+      string name { node["name"].asString() };
+      string device_name { node["device"].asString() };
+      uint8_t channel { static_cast<uint8_t>(node["channel"].asInt()) };
+      uint8_t msb { static_cast<uint8_t>(node["msb"].asInt()) };
+      uint8_t lsb { static_cast<uint8_t>(node["lsb"].asInt()) };
+      uint8_t program { static_cast<uint8_t>(node["program"].asInt()) };
+
+      Track track { devices[device_name], channel, name };
+      track.setPatch(msb, lsb, program);
+      player.addTrack( track );
+    }
+
+    return Session { player, recorder };
   }
 };
 
