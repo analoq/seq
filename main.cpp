@@ -1,11 +1,18 @@
 #include "Session.hpp"
+#include "Gui.hpp"
 
 using namespace std;
 
 int main(int argc, char *argv[]) try
 {
   Session session;
-  session.run();
+
+  Gui gui { session };
+
+  session.player.start();
+  gui.run();
+  session.player.stop();
+
   return 0;
 }
 catch(exception &e)
