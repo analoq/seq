@@ -19,7 +19,7 @@ public:
 
   Session(Player &p, Recorder &r) : player{p}, recorder{r}
   {
-    recorder.setTrack(&player.getTrack(1));
+    recorder.setTrack(&player.getTrack(0));
   }
 
   static Session jsonFactory(string path)

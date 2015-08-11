@@ -54,40 +54,49 @@ public:
 
         case 'q':
           session.player.getTrack(0).getClip(0).toggle();
+          session.recorder.setTrack(&session.player.getTrack(0));
           session.recorder.setClip(session.player.getTrack(0).getClip(0));
           break;
         case 'w':
           session.player.getTrack(1).getClip(0).toggle();
+          session.recorder.setTrack(&session.player.getTrack(1));
           session.recorder.setClip(session.player.getTrack(1).getClip(0));
           break;
         case 'e':
           session.player.getTrack(2).getClip(0).toggle();
+          session.recorder.setTrack(&session.player.getTrack(2));
           session.recorder.setClip(session.player.getTrack(2).getClip(0));
           break;
 
         case 'a':
           session.player.getTrack(0).getClip(1).toggle();
+          session.recorder.setTrack(&session.player.getTrack(0));
           session.recorder.setClip(session.player.getTrack(0).getClip(1));
           break;
         case 's':
           session.player.getTrack(1).getClip(1).toggle();
+          session.recorder.setTrack(&session.player.getTrack(1));
           session.recorder.setClip(session.player.getTrack(1).getClip(1));
           break;
         case 'd':
           session.player.getTrack(2).getClip(1).toggle();
+          session.recorder.setTrack(&session.player.getTrack(2));
           session.recorder.setClip(session.player.getTrack(2).getClip(1));
           break;
 
         case 'z':
           session.player.getTrack(0).getClip(2).toggle();
+          session.recorder.setTrack(&session.player.getTrack(0));
           session.recorder.setClip(session.player.getTrack(0).getClip(2));
           break;
         case 'x':
           session.player.getTrack(1).getClip(2).toggle();
+          session.recorder.setTrack(&session.player.getTrack(1));
           session.recorder.setClip(session.player.getTrack(1).getClip(2));
           break;
         case 'c':
           session.player.getTrack(2).getClip(2).toggle();
+          session.recorder.setTrack(&session.player.getTrack(2));
           session.recorder.setClip(session.player.getTrack(0).getClip(2));
           break;
 
