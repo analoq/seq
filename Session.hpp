@@ -66,9 +66,11 @@ public:
       uint8_t msb { static_cast<uint8_t>(node["msb"].asInt()) };
       uint8_t lsb { static_cast<uint8_t>(node["lsb"].asInt()) };
       uint8_t program { static_cast<uint8_t>(node["program"].asInt()) };
+      uint8_t volume { static_cast<uint8_t>(node["volume"].asInt()) };
 
       Track track { devices[device_name], channel, name };
       track.setPatch(msb, lsb, program);
+      track.setVolume(volume);
       player.addTrack( track );
     }
 

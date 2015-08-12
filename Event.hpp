@@ -30,10 +30,15 @@ struct NoteOffEvent : Event
 
 struct ControlEvent : Event
 {
-  uint8_t controller;
+  enum Controller : uint8_t
+  {
+    MODULATION = 1,
+    VOLUME = 7
+  } controller;
   uint8_t value;
 
-  ControlEvent(uint8_t c, uint8_t v) : controller{c}, value{v}
+
+  ControlEvent(Controller c, uint8_t v) : controller{c}, value{v}
   {
   }
 };

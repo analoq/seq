@@ -50,6 +50,13 @@ public:
     (*device).write(channel, PatchEvent {msb, lsb, program});
   }
 
+  void setVolume(const uint8_t volume)
+  {
+    (*device).write(channel,
+                    ControlEvent { ControlEvent::Controller::VOLUME,
+                                   volume });
+  }
+
   void send(const Event &event) const
   {
     (*device).write(channel, event);

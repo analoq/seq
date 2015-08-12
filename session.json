@@ -11,7 +11,8 @@
       "channel": 0,
       "msb": 63,
       "lsb": 0,
-      "program": 1
+      "program": 1,
+      "volume": 127
     },
     {
       "name": "Strings",
@@ -19,7 +20,8 @@
       "channel": 1,
       "msb": 63,
       "lsb": 0,
-      "program": 3
+      "program": 3,
+      "volume": 100
     },
     {
       "name": "Bass",
@@ -27,7 +29,8 @@
       "channel": 2,
       "msb": 63,
       "lsb": 0,
-      "program": 6
+      "program": 6,
+      "volume": 110
     }
   ]
 }
