@@ -30,6 +30,9 @@ public:
     raw();
     curs_set(0);
     keypad(stdscr, true);
+    start_color();
+    init_pair(1, COLOR_WHITE, COLOR_BLUE);
+
     refresh();
 
     thread t { Gui::update, ref(session) };
@@ -115,6 +118,7 @@ public:
   static void update(Session &session)
   {
     WINDOW *session_win { newwin(5, COLS, 0, 0) };
+    wbkgd(session_win, COLOR_PAIR(1));
     box(session_win, 0, 0);
     mvwprintw(session_win, 1, 1, "Tempo:");
 

@@ -3,7 +3,7 @@
   "input_devices": ["hw:3,0,0"],
   "clock_devices": ["hw:3,0,8"],
 
-  "tempo": 110.0,
+  "tempo": 100.0,
   "tracks": [
     {
       "name": "Piano",
