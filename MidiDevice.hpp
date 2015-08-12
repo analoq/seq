@@ -24,28 +24,6 @@ private:
     MIDI_CONTROL = 0xB0,
   };
 
-  void write(const uint8_t channel, const NoteOnEvent &event) const
-  {
-    uint8_t buffer[]
-    {
-      static_cast<uint8_t>(MIDI_NOTE_ON | channel),
-      event.note,
-      event.velocity
-    };
-    snd_rawmidi_write(handle_out, buffer, 3);
-  }
-
-  void write(const uint8_t channel, const NoteOffEvent &event) const
-  {
-    unsigned char buffer[]
-    {
-      static_cast<uint8_t>(MIDI_NOTE_OFF | channel),
-      event.note,
-      0
-    };
-    snd_rawmidi_write(handle_out, buffer, 3);
-  }
-
 public:
   string device_id;
 
@@ -85,6 +63,28 @@ public:
       default:
         return shared_ptr<Event>(new Event {});
     }
+  }
+
+  void write(const uint8_t channel, const NoteOnEvent &event) const
+  {
+    uint8_t buffer[]
+    {
+      static_cast<uint8_t>(MIDI_NOTE_ON | channel),
+      event.note,
+      event.velocity
+    };
+    snd_rawmidi_write(handle_out, buffer, 3);
+  }
+
+  void write(const uint8_t channel, const NoteOffEvent &event) const
+  {
+    unsigned char buffer[]
+    {
+      static_cast<uint8_t>(MIDI_NOTE_OFF | channel),
+      event.note,
+      0
+    };
+    snd_rawmidi_write(handle_out, buffer, 3);
   }
 
   void write(const uint8_t channel, const ControlEvent &event) const
