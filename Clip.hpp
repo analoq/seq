@@ -3,6 +3,7 @@
 #include <memory>
 #include <cmath>
 #include <map>
+#include <algorithm>
 #include "Event.hpp"
 
 using namespace std;
@@ -145,8 +146,12 @@ public:
     }
 
     // increment open notes
-    for ( auto &open_note_pair : open_notes )
-      (*open_note_pair.second.timed_event).length ++;
+    for_each(open_notes.begin(), open_notes.end(),
+         [](pair<const uint8_t, OpenNote> &open_note_pair)
+         {
+            (*open_note_pair.second.timed_event).length ++;
+         }
+      );
 
     // release playing notes
     for ( auto pnit = playing_notes.begin();
