@@ -38,7 +38,7 @@ private:
   };
 
   int time = 0;
-  int quantize_time = 6;
+  int quantize_time = TICKS_PER_BEAT / 4;
   int length_beats;
   list<TimedEvent> events;
   list<TimedEvent>::iterator it;
