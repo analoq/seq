@@ -1,13 +1,13 @@
 {
-  "devices": ["hw:3,0,0", "hw:3,0,8"],
-  "input_devices": ["hw:3,0,0"],
-  "clock_devices": ["hw:3,0,8"],
+  "devices": ["hw:2,0,0", "hw:2,0,8"],
+  "input_devices": ["hw:2,0,0"],
+  "clock_devices": ["hw:2,0,8"],
 
   "tempo": 100.0,
   "tracks": [
     {
       "name": "Piano",
-      "device": "hw:3,0,0",
+      "device": "hw:2,0,0",
       "channel": 0,
       "msb": 63,
       "lsb": 0,
@@ -16,7 +16,7 @@
     },
     {
       "name": "Strings",
-      "device": "hw:3,0,0",
+      "device": "hw:2,0,0",
       "channel": 1,
       "msb": 63,
       "lsb": 0,
@@ -25,7 +25,7 @@
     },
     {
       "name": "Bass",
-      "device": "hw:3,0,0",
+      "device": "hw:2,0,0",
       "channel": 2,
       "msb": 63,
       "lsb": 0,

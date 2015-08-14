@@ -24,19 +24,24 @@ private:
     int time;
     int length;
     shared_ptr<NoteOnEvent> note_on;
+
+    TimedEvent(int t, int l, shared_ptr<NoteOnEvent> n)
+      : time{t}, length{l}, note_on{n}
+    {
+    }
   };
 
   struct OpenNote
   {
-    shared_ptr<TimedEvent> timed_event;
+    TimedEvent &timed_event;
     int original_time;
   };
 
   int time = 0;
   int quantize_time = 6;
   int length_beats;
-  list<shared_ptr<TimedEvent>> events;
-  list<shared_ptr<TimedEvent>>::iterator it;
+  list<TimedEvent> events;
+  list<TimedEvent>::iterator it;
 
   map<uint8_t, OpenNote> open_notes;
   list<TimedEvent> playing_notes;
@@ -98,25 +103,26 @@ public:
     if ( typeid(*event) == typeid(NoteOnEvent) )
     {
       shared_ptr<NoteOnEvent> note_on { dynamic_pointer_cast<NoteOnEvent>(event) };
-      shared_ptr<TimedEvent> timed_event = shared_ptr<TimedEvent>(new TimedEvent { time, 0, note_on });
 
-
-      (*timed_event).time = quantize_time * 
-                            round(time / static_cast<double>(quantize_time));
-      if ( (*timed_event).time >= length_beats * TICKS_PER_BEAT )
+      int event_time = quantize_time * 
+                       round(time / static_cast<double>(quantize_time));
+      if ( event_time >= length_beats * TICKS_PER_BEAT )
       {
-        (*timed_event).time -= length_beats * TICKS_PER_BEAT;
-        events.push_front( timed_event );
+        event_time -= length_beats * TICKS_PER_BEAT;
+        events.emplace_front( event_time, 0, note_on );
+        open_notes.emplace((*note_on).note, OpenNote { events.front(), time });
       }
       else
-        events.insert(it, timed_event );
-
-      open_notes[(*note_on).note] = OpenNote { timed_event, time };
+      {
+        it = events.emplace(it, event_time, 0, note_on);
+        open_notes.emplace((*note_on).note, OpenNote { *it, time });
+        ++ it;
+      }
     }
     else if ( typeid(*event) == typeid(NoteOffEvent) )
     {
       shared_ptr<NoteOffEvent> note_off { dynamic_pointer_cast<NoteOffEvent>(event) };
-      OpenNote &open_note = open_notes[(*note_off).note];
+      OpenNote &open_note = open_notes.at((*note_off).note);
       open_notes.erase((*note_off).note);
     }
   }
@@ -137,11 +143,11 @@ public:
     // play notes
     if ( state == ON || state == TURNING_OFF )
     {
-      while ( it != events.end() && time >= (**it).time )
+      while ( it != events.end() && time >= (*it).time )
       {
-        (*device).write(channel, *(**it).note_on);
-        playing_notes.push_back(**it);
-        it ++;
+        (*device).write(channel, *(*it).note_on);
+        playing_notes.push_back(*it);
+        ++ it;
       }
     }
 
@@ -149,7 +155,7 @@ public:
     for_each(open_notes.begin(), open_notes.end(),
          [](pair<const uint8_t, OpenNote> &open_note_pair)
          {
-            (*open_note_pair.second.timed_event).length ++;
+            open_note_pair.second.timed_event.length ++;
          }
       );
 
