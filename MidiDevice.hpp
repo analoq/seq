@@ -131,17 +131,17 @@ public:
 
   void write(const uint8_t channel, const Event &event) const
   {
-    if (typeid(event) == typeid(NoteOnEvent))
+    if ( dynamic_cast<const NoteOnEvent *>(&event) )
     {
       const NoteOnEvent &note_on = static_cast<const NoteOnEvent &>(event);
       write(channel, note_on);
     }
-    else if (typeid(event) == typeid(NoteOffEvent))
+    else if (dynamic_cast<const NoteOffEvent *>(&event) )
     {
       const NoteOffEvent &note_off = static_cast<const NoteOffEvent &>(event);
       write(channel, note_off);
     }
-    else if (typeid(event) == typeid(ControlEvent))
+    else if (dynamic_cast<const ControlEvent *>(&event) )
     {
       const ControlEvent &control = static_cast<const ControlEvent &>(event);
       write(channel, control);

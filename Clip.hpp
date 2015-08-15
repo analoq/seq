@@ -20,32 +20,20 @@ enum ClipState
 class Clip
 {
 private:
-  struct TimedEvent
-  {
-    int time;
-    int length;
-    shared_ptr<NoteOnEvent> note_on;
-
-    TimedEvent(int t, int l, shared_ptr<NoteOnEvent> n)
-      : time{t}, length{l}, note_on{n}
-    {
-    }
-  };
-
   struct OpenNote
   {
-    TimedEvent &timed_event;
+    TimedNoteOnEvent &timed_event;
     int original_time;
   };
 
   int time = 0;
   int quantize_time = TICKS_PER_BEAT / 4;
   int length_beats;
-  list<TimedEvent> events;
-  list<TimedEvent>::iterator it;
+  list<TimedNoteOnEvent> events;
+  list<TimedNoteOnEvent>::iterator it;
 
   unordered_map<uint8_t, OpenNote> open_notes;
-  list<TimedEvent> playing_notes;
+  list<TimedNoteOnEvent> playing_notes;
 
   ClipState state = OFF;
 
@@ -103,28 +91,28 @@ public:
   {
     if ( typeid(*event) == typeid(NoteOnEvent) )
     {
-      shared_ptr<NoteOnEvent> note_on { dynamic_pointer_cast<NoteOnEvent>(event) };
+      NoteOnEvent &note_on(*dynamic_pointer_cast<NoteOnEvent>(event));
 
       int event_time = quantize_time * 
                        round(time / static_cast<double>(quantize_time));
       if ( event_time >= length_beats * TICKS_PER_BEAT )
       {
         event_time -= length_beats * TICKS_PER_BEAT;
-        events.emplace_front( event_time, 0, note_on );
-        open_notes.emplace((*note_on).note, OpenNote { events.front(), time });
+        events.emplace_front( event_time, note_on );
+        open_notes.emplace(note_on.note, OpenNote { events.front(), time });
       }
       else
       {
-        it = events.emplace(it, event_time, 0, note_on);
-        open_notes.emplace((*note_on).note, OpenNote { *it, time });
+        it = events.emplace(it, event_time, note_on);
+        open_notes.emplace(note_on.note, OpenNote { *it, time });
         ++ it;
       }
     }
     else if ( typeid(*event) == typeid(NoteOffEvent) )
     {
-      shared_ptr<NoteOffEvent> note_off { dynamic_pointer_cast<NoteOffEvent>(event) };
-      OpenNote &open_note = open_notes.at((*note_off).note);
-      open_notes.erase((*note_off).note);
+      NoteOffEvent &note_off(*dynamic_pointer_cast<NoteOffEvent>(event));
+      OpenNote &open_note = open_notes.at(note_off.note);
+      open_notes.erase(note_off.note);
     }
   }
 
@@ -146,7 +134,7 @@ public:
     {
       while ( it != events.end() && time >= (*it).time )
       {
-        callback(*(*it).note_on);
+        callback(*it);
         playing_notes.push_back(*it);
         ++ it;
       }
@@ -164,11 +152,11 @@ public:
     for ( auto pnit = playing_notes.begin();
           pnit != playing_notes.end(); )
     {
-      TimedEvent &playing_note = *pnit;
+      TimedNoteOnEvent &playing_note = *pnit;
       playing_note.length -- ;
       if ( !playing_note.length )
       {
-        callback( NoteOffEvent { (*playing_note.note_on).note } );
+        callback( NoteOffEvent { playing_note.note } );
         pnit = playing_notes.erase(pnit);
       }
       else
