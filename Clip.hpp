@@ -2,7 +2,7 @@
 #include <list>
 #include <memory>
 #include <cmath>
-#include <map>
+#include <unordered_map>
 #include <algorithm>
 #include "Event.hpp"
 
@@ -43,7 +43,7 @@ private:
   list<TimedEvent> events;
   list<TimedEvent>::iterator it;
 
-  map<uint8_t, OpenNote> open_notes;
+  unordered_map<uint8_t, OpenNote> open_notes;
   list<TimedEvent> playing_notes;
 
   ClipState state = OFF;

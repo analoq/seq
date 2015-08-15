@@ -31,12 +31,12 @@ public:
     return tracks[index];
   }
 
-  int getTrackCount()
+  int getTrackCount() const
   {
     return tracks.size();
   }
 
-  double getBPM()
+  double getBPM() const
   {
     return BPM;
   }

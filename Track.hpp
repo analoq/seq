@@ -20,17 +20,17 @@ public:
   {
   }
 
-  string getName()
+  string getName() const
   {
     return name;
   }
 
-  uint8_t getChannel()
+  uint8_t getChannel() const
   {
     return channel;
   }
 
-  string getDeviceName()
+  string getDeviceName() const
   {
     return (*device).device_id;
   }
@@ -40,7 +40,7 @@ public:
     return clips.at(index);
   }
 
-  const int getClipCount()
+  const int getClipCount() const
   {
     return clips.size();
   }

@@ -15,7 +15,7 @@ public:
   {
   }
 
-  Clip *getClip()
+  Clip *getClip() const
   {
     return active_clip;
   }
@@ -35,7 +35,7 @@ public:
     active_track = track;
   }
 
-  Track *getTrack()
+  Track *getTrack() const
   {
     return active_track;
   }
