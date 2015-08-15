@@ -3,6 +3,7 @@
 #include <memory>
 #include <cmath>
 #include <unordered_map>
+#include <functional>
 #include <algorithm>
 #include "Event.hpp"
 
@@ -138,14 +139,14 @@ public:
     it = events.begin();
   }
 
-  void tick(shared_ptr<MidiDevice> device, int channel)
+  void tick(function<void(const Event &event)> callback)
   {
     // play notes
     if ( state == ON || state == TURNING_OFF )
     {
       while ( it != events.end() && time >= (*it).time )
       {
-        (*device).write(channel, *(*it).note_on);
+        callback(*(*it).note_on);
         playing_notes.push_back(*it);
         ++ it;
       }
@@ -167,7 +168,7 @@ public:
       playing_note.length -- ;
       if ( !playing_note.length )
       {
-        (*device).write(channel, NoteOffEvent { (*playing_note.note_on).note } );
+        callback( NoteOffEvent { (*playing_note.note_on).note } );
         pnit = playing_notes.erase(pnit);
       }
       else

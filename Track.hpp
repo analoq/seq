@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <functional>
 #include "MidiDevice.hpp"
 #include "Clip.hpp"
 #include "Event.hpp"
@@ -70,8 +71,11 @@ public:
 
   void tick()
   {
+    function<void(const Event &)> f = bind(&Track::send,
+                                           *this,
+                                           placeholders::_1);
     for ( Clip &clip : clips )
-      clip.tick(device, channel);
+      clip.tick( f );
   }
 };
 
