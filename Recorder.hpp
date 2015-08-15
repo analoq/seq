@@ -64,9 +64,7 @@ public:
         recorder.active_track->send(*event);
 
       if ( recorder.active_clip != nullptr &&
-           recorder.active_clip->getState() == ClipState::ON &&
-           ( typeid(*event) == typeid(NoteOnEvent) ||
-             typeid(*event) == typeid(NoteOffEvent) ) )
+           recorder.active_clip->getState() == ClipState::ON )
         recorder.active_clip->addEvent(move(event));
     }
   }
