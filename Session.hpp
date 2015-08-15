@@ -31,10 +31,13 @@ public:
 
     // get devices
     map<string, shared_ptr<MidiDevice>> devices;
-    for ( Json::Value node : root["devices"] )
+    for ( Json::ValueIterator it = root["devices"].begin();
+          it != root["devices"].end();
+          ++ it )
     {
-      string device_name { node.asString() };
-      devices[device_name] = shared_ptr<MidiDevice>(new MidiDevice {device_name});
+      string device_name { it.key().asString() };
+      string device_id { (*it).asString() };
+      devices[device_name] = shared_ptr<MidiDevice>(new MidiDevice {device_id});
     }
 
     // get input devices
