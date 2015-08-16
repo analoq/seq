@@ -110,7 +110,6 @@ public:
     else if ( typeid(*event) == typeid(NoteOffEvent) )
     {
       NoteOffEvent &note_off(*dynamic_pointer_cast<NoteOffEvent>(event));
-      OpenNote &open_note = open_notes.at(note_off.note);
       open_notes.erase(note_off.note);
     }
   }
