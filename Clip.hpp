@@ -33,7 +33,6 @@ private:
   list<TimedNoteOnEvent>::iterator it;
 
   unordered_map<uint8_t, OpenNote> open_notes;
-  list<TimedNoteOnEvent> playing_notes;
 
   ClipState state = OFF;
 
@@ -127,7 +126,7 @@ public:
     it = events.begin();
   }
 
-  void tick(function<void(const Event &event)> callback)
+  void tick(function<void(const TimedNoteOnEvent &)> callback)
   {
     // play notes
     if ( state == ON || state == TURNING_OFF )
@@ -135,7 +134,6 @@ public:
       while ( it != events.end() && time >= (*it).time )
       {
         callback(*it);
-        playing_notes.push_back(*it);
         ++ it;
       }
     }
@@ -147,21 +145,6 @@ public:
             open_note_pair.second.timed_event.length ++;
          }
       );
-
-    // release playing notes
-    for ( auto pnit = playing_notes.begin();
-          pnit != playing_notes.end(); )
-    {
-      TimedNoteOnEvent &playing_note = *pnit;
-      playing_note.length -- ;
-      if ( !playing_note.length )
-      {
-        callback( NoteOffEvent { playing_note.note } );
-        pnit = playing_notes.erase(pnit);
-      }
-      else
-        ++pnit;
-    }
 
     // increment time
     time ++;

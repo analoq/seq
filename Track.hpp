@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <list>
 #include "MidiDevice.hpp"
 #include "Clip.hpp"
 #include "Event.hpp"
@@ -14,6 +15,7 @@ private:
   shared_ptr<MidiDevice> device;
 
   vector<Clip> clips { Clip{8}, Clip{8}, Clip{8} };
+  list<TimedNoteOnEvent> playing_notes;
 
 public:
   Track(shared_ptr<MidiDevice> d, uint8_t c, string n)
@@ -58,9 +60,15 @@ public:
                                    volume });
   }
 
-  void send(const Event &event) const
+  void send(const Event &event)
   {
     (*device).write(channel, event);
+  }
+
+  void sendNote(const TimedNoteOnEvent &event)
+  {
+    send(event);
+    playing_notes.push_back(event);
   }
 
   void start()
@@ -71,9 +79,25 @@ public:
 
   void tick()
   {
-    function<void(const Event &)> f = bind(&Track::send,
-                                           *this,
-                                           placeholders::_1);
+    // release playing notes
+    for ( auto it = playing_notes.begin();
+          it != playing_notes.end(); )
+    {
+      TimedNoteOnEvent &playing_note = *it;
+      playing_note.length -- ;
+
+      if ( !playing_note.length )
+      {
+        (*device).write( channel, NoteOffEvent { playing_note.note } );
+        it = playing_notes.erase(it);
+      }
+      else
+        ++it;
+    }
+
+    function<void(const TimedNoteOnEvent &)> f = bind(&Track::sendNote,
+                                                      this,
+                                                      placeholders::_1);
     for ( Clip &clip : clips )
       clip.tick( f );
   }
