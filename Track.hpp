@@ -63,12 +63,8 @@ public:
   void send(const Event &event)
   {
     (*device).write(channel, event);
-  }
-
-  void sendNote(const TimedNoteOnEvent &event)
-  {
-    send(event);
-    playing_notes.push_back(event);
+    if ( dynamic_cast<const TimedNoteOnEvent *>(&event) )
+      playing_notes.push_back(static_cast<const TimedNoteOnEvent &>(event));
   }
 
   void start()
@@ -95,9 +91,9 @@ public:
         ++it;
     }
 
-    function<void(const TimedNoteOnEvent &)> f = bind(&Track::sendNote,
-                                                      this,
-                                                      placeholders::_1);
+    function<void(const Event &)> f = bind(&Track::send,
+                                           this,
+                                           placeholders::_1);
     for ( Clip &clip : clips )
       clip.tick( f );
   }

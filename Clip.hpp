@@ -126,7 +126,7 @@ public:
     it = events.begin();
   }
 
-  void tick(function<void(const TimedNoteOnEvent &)> callback)
+  void tick(function<void(const Event &)> callback)
   {
     // play notes
     if ( state == ON || state == TURNING_OFF )
