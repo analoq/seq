@@ -80,7 +80,7 @@ public:
       for ( Track &track : player.tracks)
         track.tick();
       for ( shared_ptr<MidiDevice> device : player.clock_devices )
-        (*device).write( ClockEvent{} );
+        (*device).tick();
 
       this_thread::sleep_for(tick_time + start_time -
                              chrono::high_resolution_clock::now());

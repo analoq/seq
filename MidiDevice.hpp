@@ -6,12 +6,13 @@
 #include <alsa/asoundlib.h>
 
 #include "Event.hpp"
+#include "Clocked.hpp"
 
 using namespace std;
 
 const int TICKS_PER_BEAT = 24;
 
-class MidiDevice
+class MidiDevice : Clocked
 {
 private:
   snd_rawmidi_t *handle_in = 0;
@@ -161,6 +162,11 @@ public:
       const ControlEvent &control = static_cast<const ControlEvent &>(event);
       write(channel, control);
     }
+  }
+
+  void tick()
+  {
+    write( ClockEvent{} );
   }
 };
 

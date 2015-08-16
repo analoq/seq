@@ -6,8 +6,9 @@
 #include "MidiDevice.hpp"
 #include "Clip.hpp"
 #include "Event.hpp"
+#include "Clocked.hpp"
 
-class Track
+class Track : Clocked
 {
 private:
   uint8_t channel;
