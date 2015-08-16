@@ -5,7 +5,8 @@ using namespace std;
 
 int main(int argc, char *argv[]) try
 {
-  Session session { Session::jsonFactory("session.json") };
+  Session session;
+  session.loadJSON("session.json");
 
   Gui gui { session };
 

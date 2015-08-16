@@ -12,7 +12,7 @@ using namespace std;
 
 const int TICKS_PER_BEAT = 24;
 
-class MidiDevice : Clocked
+class MidiDevice : public Clocked
 {
 private:
   snd_rawmidi_t *handle_in = 0;
@@ -162,6 +162,16 @@ public:
       const ControlEvent &control = static_cast<const ControlEvent &>(event);
       write(channel, control);
     }
+  }
+
+  void start()
+  {
+    write( StartEvent{} );
+  }
+
+  void stop()
+  {
+    write( StopEvent{} );
   }
 
   void tick()

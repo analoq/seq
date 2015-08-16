@@ -8,7 +8,7 @@
 #include "Event.hpp"
 #include "Clocked.hpp"
 
-class Track : Clocked
+class Track : public Clocked
 {
 private:
   uint8_t channel;
@@ -72,6 +72,10 @@ public:
   {
     for ( Clip &clip : clips )
       clip.start();
+  }
+
+  void stop()
+  {
   }
 
   void tick()

@@ -16,13 +16,19 @@ class Session
 public:
   Player player;
   Recorder recorder;
+  vector<shared_ptr<Track>> tracks;
 
-  Session(Player &p, Recorder &r) : player{p}, recorder{r}
+  Track &getTrack(int index)
   {
-    recorder.setTrack(&player.getTrack(0));
+    return *tracks.at(index);
   }
 
-  static Session jsonFactory(string path)
+  int getTrackCount() const
+  {
+    return tracks.size();
+  }
+
+  void loadJSON(string path)
   {
     // parse json
     Json::Value root;
@@ -41,7 +47,6 @@ public:
     }
 
     // get input devices
-    Recorder recorder;
     for ( Json::Value node : root["input_devices"] )
     {
       string device_name { node.asString() };
@@ -49,11 +54,10 @@ public:
     }
 
     // get clock devices
-    Player player;
     for ( Json::Value node : root["clock_devices"] )
     {
       string device_name { node.asString() };
-      player.addClockDevice( devices[device_name] );
+      player.addClockReceiver( devices[device_name] );
     }
 
     // get tempo
@@ -71,13 +75,15 @@ public:
       uint8_t program { static_cast<uint8_t>(node["program"].asInt()) };
       uint8_t volume { static_cast<uint8_t>(node["volume"].asInt()) };
 
-      Track track { devices[device_name], channel, name };
-      track.setPatch(msb, lsb, program);
-      track.setVolume(volume);
-      player.addTrack( track );
+      auto track = shared_ptr<Track>(new Track {devices[device_name], channel, name});
+      track->setPatch(msb, lsb, program);
+      track->setVolume(volume);
+      tracks.push_back(track);
+
+      player.addClockReceiver( track );
     }
 
-    return Session { player, recorder };
+    recorder.setTrack(&getTrack(0));
   }
 };
 

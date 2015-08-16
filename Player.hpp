@@ -2,38 +2,21 @@
 #include <cmath>
 #include <thread>
 #include <chrono>
-#include <vector>
 #include <list>
 
-#include "Track.hpp"
+#include "Clocked.hpp"
 
 class Player
 {
 private:
   double BPM = 120.0;
   bool playing = false;
-  vector<Track> tracks;
-  list<shared_ptr<MidiDevice>> clock_devices;
+  list<shared_ptr<Clocked>> clock_receivers;
  
 public:
-  void addClockDevice(shared_ptr<MidiDevice> device)
+  void addClockReceiver(shared_ptr<Clocked> receiver)
   {
-    clock_devices.push_back(device);
-  }
-
-  void addTrack(Track track)
-  {
-    tracks.push_back(track);
-  }
-
-  Track &getTrack(int index)
-  {
-    return tracks[index];
-  }
-
-  int getTrackCount() const
-  {
-    return tracks.size();
+    clock_receivers.push_back(receiver);
   }
 
   double getBPM() const
@@ -48,10 +31,8 @@ public:
 
   void start()
   {
-    for ( Track &track : tracks)
-      track.start();
-    for ( shared_ptr<MidiDevice> device : clock_devices )
-      (*device).write( StartEvent{} );
+    for ( shared_ptr<Clocked> receiver : clock_receivers )
+      receiver->start();
 
     playing = true;
     thread t(Player::process, ref(*this));
@@ -61,8 +42,8 @@ public:
   void stop()
   {
     playing = false;
-    for ( shared_ptr<MidiDevice> device : clock_devices )
-      (*device).write( StopEvent{} );
+    for ( shared_ptr<Clocked> receiver : clock_receivers )
+      receiver->stop();
   }
 
   static void process(Player &player)
@@ -77,10 +58,8 @@ public:
     {
       auto start_time = chrono::high_resolution_clock::now();
 
-      for ( Track &track : player.tracks)
-        track.tick();
-      for ( shared_ptr<MidiDevice> device : player.clock_devices )
-        (*device).tick();
+      for ( shared_ptr<Clocked> receiver : player.clock_receivers )
+        receiver->tick();
 
       this_thread::sleep_for(tick_time + start_time -
                              chrono::high_resolution_clock::now());

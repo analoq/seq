@@ -44,63 +44,63 @@ public:
       {
         case '1':
           session.recorder.clearClip();
-          session.recorder.setTrack(&session.player.getTrack(0));
+          session.recorder.setTrack(&session.getTrack(0));
           break;
         case '2':
           session.recorder.clearClip();
-          session.recorder.setTrack(&session.player.getTrack(1));
+          session.recorder.setTrack(&session.getTrack(1));
           break;
         case '3':
           session.recorder.clearClip();
-          session.recorder.setTrack(&session.player.getTrack(2));
+          session.recorder.setTrack(&session.getTrack(2));
           break;
 
         case 'q':
-          session.player.getTrack(0).getClip(0).toggle();
-          session.recorder.setTrack(&session.player.getTrack(0));
-          session.recorder.setClip(session.player.getTrack(0).getClip(0));
+          session.getTrack(0).getClip(0).toggle();
+          session.recorder.setTrack(&session.getTrack(0));
+          session.recorder.setClip(session.getTrack(0).getClip(0));
           break;
         case 'w':
-          session.player.getTrack(1).getClip(0).toggle();
-          session.recorder.setTrack(&session.player.getTrack(1));
-          session.recorder.setClip(session.player.getTrack(1).getClip(0));
+          session.getTrack(1).getClip(0).toggle();
+          session.recorder.setTrack(&session.getTrack(1));
+          session.recorder.setClip(session.getTrack(1).getClip(0));
           break;
         case 'e':
-          session.player.getTrack(2).getClip(0).toggle();
-          session.recorder.setTrack(&session.player.getTrack(2));
-          session.recorder.setClip(session.player.getTrack(2).getClip(0));
+          session.getTrack(2).getClip(0).toggle();
+          session.recorder.setTrack(&session.getTrack(2));
+          session.recorder.setClip(session.getTrack(2).getClip(0));
           break;
 
         case 'a':
-          session.player.getTrack(0).getClip(1).toggle();
-          session.recorder.setTrack(&session.player.getTrack(0));
-          session.recorder.setClip(session.player.getTrack(0).getClip(1));
+          session.getTrack(0).getClip(1).toggle();
+          session.recorder.setTrack(&session.getTrack(0));
+          session.recorder.setClip(session.getTrack(0).getClip(1));
           break;
         case 's':
-          session.player.getTrack(1).getClip(1).toggle();
-          session.recorder.setTrack(&session.player.getTrack(1));
-          session.recorder.setClip(session.player.getTrack(1).getClip(1));
+          session.getTrack(1).getClip(1).toggle();
+          session.recorder.setTrack(&session.getTrack(1));
+          session.recorder.setClip(session.getTrack(1).getClip(1));
           break;
         case 'd':
-          session.player.getTrack(2).getClip(1).toggle();
-          session.recorder.setTrack(&session.player.getTrack(2));
-          session.recorder.setClip(session.player.getTrack(2).getClip(1));
+          session.getTrack(2).getClip(1).toggle();
+          session.recorder.setTrack(&session.getTrack(2));
+          session.recorder.setClip(session.getTrack(2).getClip(1));
           break;
 
         case 'z':
-          session.player.getTrack(0).getClip(2).toggle();
-          session.recorder.setTrack(&session.player.getTrack(0));
-          session.recorder.setClip(session.player.getTrack(0).getClip(2));
+          session.getTrack(0).getClip(2).toggle();
+          session.recorder.setTrack(&session.getTrack(0));
+          session.recorder.setClip(session.getTrack(0).getClip(2));
           break;
         case 'x':
-          session.player.getTrack(1).getClip(2).toggle();
-          session.recorder.setTrack(&session.player.getTrack(1));
-          session.recorder.setClip(session.player.getTrack(1).getClip(2));
+          session.getTrack(1).getClip(2).toggle();
+          session.recorder.setTrack(&session.getTrack(1));
+          session.recorder.setClip(session.getTrack(1).getClip(2));
           break;
         case 'c':
-          session.player.getTrack(2).getClip(2).toggle();
-          session.recorder.setTrack(&session.player.getTrack(2));
-          session.recorder.setClip(session.player.getTrack(0).getClip(2));
+          session.getTrack(2).getClip(2).toggle();
+          session.recorder.setTrack(&session.getTrack(2));
+          session.recorder.setClip(session.getTrack(0).getClip(2));
           break;
 
         case KEY_BACKSPACE:
@@ -124,17 +124,17 @@ public:
 
     vector<vector<WINDOW *>> clip_windows;
     const int clip_height = 7;
-    for ( int j = 0; j < session.player.getTrackCount(); j ++ )
+    for ( int j = 0; j < session.getTrackCount(); j ++ )
     {
       WINDOW *track_win { newwin(5, 25, 5, 25*j) };
       box(track_win, 0, 0);
-      mvwprintw(track_win, 1, 1, "Track: %-12s", session.player.getTrack(j).getName().c_str() );
-      mvwprintw(track_win, 2, 1, "Device: %-12s", session.player.getTrack(j).getDeviceName().c_str() );
-      mvwprintw(track_win, 3, 1, "Channel: %-2d", session.player.getTrack(j).getChannel() );
+      mvwprintw(track_win, 1, 1, "Track: %-12s", session.getTrack(j).getName().c_str() );
+      mvwprintw(track_win, 2, 1, "Device: %-12s", session.getTrack(j).getDeviceName().c_str() );
+      mvwprintw(track_win, 3, 1, "Channel: %-2d", session.getTrack(j).getChannel() );
       wrefresh(track_win);
 
       vector<WINDOW *> col_windows;
-      for ( int i = 0; i < session.player.getTrack(j).getClipCount(); i ++ )
+      for ( int i = 0; i < session.getTrack(j).getClipCount(); i ++ )
       {
         WINDOW *win = newwin(clip_height, 25, 10 + i*clip_height, 25*j);
         box(win, 0, 0);
@@ -149,11 +149,11 @@ public:
       mvwprintw(session_win, 1, 8, "%f", session.player.getBPM());
       wrefresh(session_win);
 
-      for ( int j = 0; j < session.player.getTrackCount(); j ++ )
+      for ( int j = 0; j < session.getTrackCount(); j ++ )
       {
         for ( int i = 0; i < clip_windows[j].size(); i ++ )
         {
-          const Clip &clip = session.player.getTrack(j).getClip(i);
+          const Clip &clip = session.getTrack(j).getClip(i);
           WINDOW *win = clip_windows.at(j).at(i);
 
           // state
