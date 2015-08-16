@@ -26,7 +26,7 @@ private:
   list<TimedNoteOnEvent> events;
   list<TimedNoteOnEvent>::iterator it;
 
-  unordered_map<uint8_t, TimedNoteOnEvent &> open_notes;
+  unordered_map<shared_ptr<NoteOnEvent>, TimedNoteOnEvent &> open_notes;
 
   ClipState state = OFF;
 
@@ -84,27 +84,27 @@ public:
   {
     if ( typeid(*event) == typeid(NoteOnEvent) )
     {
-      NoteOnEvent &note_on(*dynamic_pointer_cast<NoteOnEvent>(event));
+      shared_ptr<NoteOnEvent> note_on(dynamic_pointer_cast<NoteOnEvent>(event));
 
       int event_time = quantize_time * 
                        round(time / static_cast<double>(quantize_time));
       if ( event_time >= length_beats * TICKS_PER_BEAT )
       {
         event_time -= length_beats * TICKS_PER_BEAT;
-        events.emplace_front( event_time, note_on );
-        open_notes.emplace(note_on.note, events.front());
+        events.emplace_front( event_time, *note_on );
+        open_notes.emplace(note_on, events.front());
       }
       else
       {
-        it = events.emplace(it, event_time, note_on);
-        open_notes.emplace(note_on.note, *it);
+        it = events.emplace(it, event_time, *note_on);
+        open_notes.emplace(note_on, *it);
         ++ it;
       }
     }
     else if ( typeid(*event) == typeid(NoteOffEvent) )
     {
       NoteOffEvent &note_off(*dynamic_pointer_cast<NoteOffEvent>(event));
-      open_notes.erase((*note_off.note_on).note);
+      open_notes.erase(note_off.note_on);
     }
   }
 
@@ -133,7 +133,7 @@ public:
 
     // increment open notes
     for_each(open_notes.begin(), open_notes.end(),
-         [](pair<const uint8_t, TimedNoteOnEvent &> &open_note_pair)
+         [](pair<const shared_ptr<NoteOnEvent>, TimedNoteOnEvent &> &open_note_pair)
          {
             open_note_pair.second.length ++;
          }
