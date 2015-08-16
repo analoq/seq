@@ -84,7 +84,7 @@ public:
 
       if ( !playing_note.length )
       {
-        (*device).write( channel, NoteOffEvent { playing_note.note } );
+        send(NoteOffEvent(shared_ptr<NoteOnEvent>(new NoteOnEvent {playing_note})) );
         it = playing_notes.erase(it);
       }
       else

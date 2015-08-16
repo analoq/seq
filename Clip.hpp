@@ -20,19 +20,13 @@ enum ClipState
 class Clip
 {
 private:
-  struct OpenNote
-  {
-    TimedNoteOnEvent &timed_event;
-    int original_time;
-  };
-
   int time = 0;
   int quantize_time = TICKS_PER_BEAT / 4;
   int length_beats;
   list<TimedNoteOnEvent> events;
   list<TimedNoteOnEvent>::iterator it;
 
-  unordered_map<uint8_t, OpenNote> open_notes;
+  unordered_map<uint8_t, TimedNoteOnEvent &> open_notes;
 
   ClipState state = OFF;
 
@@ -98,19 +92,19 @@ public:
       {
         event_time -= length_beats * TICKS_PER_BEAT;
         events.emplace_front( event_time, note_on );
-        open_notes.emplace(note_on.note, OpenNote { events.front(), time });
+        open_notes.emplace(note_on.note, events.front());
       }
       else
       {
         it = events.emplace(it, event_time, note_on);
-        open_notes.emplace(note_on.note, OpenNote { *it, time });
+        open_notes.emplace(note_on.note, *it);
         ++ it;
       }
     }
     else if ( typeid(*event) == typeid(NoteOffEvent) )
     {
       NoteOffEvent &note_off(*dynamic_pointer_cast<NoteOffEvent>(event));
-      open_notes.erase(note_off.note);
+      open_notes.erase((*note_off.note_on).note);
     }
   }
 
@@ -139,9 +133,9 @@ public:
 
     // increment open notes
     for_each(open_notes.begin(), open_notes.end(),
-         [](pair<const uint8_t, OpenNote> &open_note_pair)
+         [](pair<const uint8_t, TimedNoteOnEvent &> &open_note_pair)
          {
-            open_note_pair.second.timed_event.length ++;
+            open_note_pair.second.length ++;
          }
       );
 

@@ -1,7 +1,7 @@
 #pragma once
 #include <stdexcept>
 #include <string>
-#include <typeinfo>
+#include <unordered_map>
 #include <memory>
 #include <alsa/asoundlib.h>
 
@@ -24,6 +24,8 @@ private:
     MIDI_CONTROL = 0xB0,
   };
 
+  unordered_map<uint8_t, shared_ptr<NoteOnEvent>> open_notes;
+
 public:
   string device_id;
 
@@ -42,20 +44,33 @@ public:
     snd_rawmidi_close(handle_out);
   }
 
-  shared_ptr<Event> read() const
+  shared_ptr<Event> read()
   {
     uint8_t buffer_in[3];
     snd_rawmidi_read(handle_in, &buffer_in, 3);
+
+    shared_ptr<NoteOnEvent> note_on, note_off;
+
     switch ( buffer_in[0] & 0xF0 )
     {
       case MIDI_NOTE_ON:
         if ( buffer_in[2] )
-          return shared_ptr<Event>(new NoteOnEvent { buffer_in[1], buffer_in[2] });
+        {
+          note_on = shared_ptr<NoteOnEvent>(new NoteOnEvent { buffer_in[1], buffer_in[2] });
+          open_notes[buffer_in[1]] = note_on;
+          return note_on;
+        }
         else
-          return shared_ptr<Event>(new NoteOffEvent { buffer_in[1] });
+        {
+          note_on = open_notes.at(buffer_in[1]);
+          open_notes.erase(buffer_in[1]);
+          return shared_ptr<Event>(new NoteOffEvent { note_on });
+        }
 
       case MIDI_NOTE_OFF:
-        return shared_ptr<Event>(new NoteOffEvent { buffer_in[1] });
+        note_on = open_notes.at(buffer_in[1]);
+        open_notes.erase(buffer_in[1]);
+        return shared_ptr<Event>(new NoteOffEvent { note_on });
 
       case MIDI_CONTROL:
         return shared_ptr<Event>(new ControlEvent { static_cast<ControlEvent::Controller>(buffer_in[1]), buffer_in[2] });
@@ -81,7 +96,7 @@ public:
     unsigned char buffer[]
     {
       static_cast<uint8_t>(MIDI_NOTE_OFF | channel),
-      event.note,
+      (*event.note_on).note,
       0
     };
     snd_rawmidi_write(handle_out, buffer, 3);

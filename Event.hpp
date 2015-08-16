@@ -1,5 +1,6 @@
 #pragma once
-#include <iostream>
+#include <memory>
+
 using namespace std;
 
 struct Event
@@ -50,9 +51,9 @@ struct TimedNoteOnEvent : NoteOnEvent, TimedEvent
 
 struct NoteOffEvent : Event
 {
-  uint8_t note;
+  shared_ptr<NoteOnEvent> note_on;
 
-  NoteOffEvent(uint8_t n) : note{n}
+  NoteOffEvent(shared_ptr<NoteOnEvent> n) : note_on{n}
   {
   }
 };
