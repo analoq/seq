@@ -25,7 +25,6 @@ private:
   list<shared_ptr<NoteOnEvent>> events;
   list<shared_ptr<NoteOnEvent>>::iterator it;
 
-  list<NoteOnEvent> playing_notes;
   ClipState state = OFF;
 
 public:
@@ -120,25 +119,8 @@ public:
       while ( it != events.end() && time >= (*it)->time )
       {
         callback(**it);
-        playing_notes.push_back(**it);
         ++ it;
       }
-    }
-
-    // release playing notes
-    for ( auto pnit = playing_notes.begin();
-          pnit != playing_notes.end(); )
-    {
-      NoteOnEvent &playing_note = *pnit;
-      playing_note.length -- ;
-
-      if ( !playing_note.length )
-      {
-        callback(NoteOffEvent(shared_ptr<NoteOnEvent>(new NoteOnEvent {playing_note})) );
-        pnit = playing_notes.erase(pnit);
-      }
-      else
-        ++pnit;
     }
 
     // increment time

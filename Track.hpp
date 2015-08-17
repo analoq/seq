@@ -17,6 +17,8 @@ private:
   string name;
   shared_ptr<MidiOutputDevice> device;
 
+  list<NoteOnEvent> playing_notes;
+
   vector<Clip> clips { Clip{8}, Clip{8}, Clip{8} };
 public:
   Track(shared_ptr<MidiOutputDevice> d, uint8_t c, string n)
@@ -64,6 +66,12 @@ public:
   void send(const Event &event)
   {
     (*device).write(channel, event);
+    if ( typeid(event) == typeid(NoteOnEvent) )
+    {
+      const NoteOnEvent &note_on = static_cast<const NoteOnEvent &>(event);
+      if ( note_on.length )
+        playing_notes.push_back(note_on);
+    }
   }
 
   void start()
@@ -78,6 +86,22 @@ public:
 
   void tick()
   {
+    // release playing notes
+    for ( auto pnit = playing_notes.begin();
+          pnit != playing_notes.end(); )
+    {
+      NoteOnEvent &playing_note = *pnit;
+      playing_note.length -- ;
+
+      if ( !playing_note.length )
+      {
+        send(NoteOffEvent(shared_ptr<NoteOnEvent>(new NoteOnEvent {playing_note})) );
+        pnit = playing_notes.erase(pnit);
+      }
+      else
+        ++pnit;
+    }
+
     function<void(const Event &)> f = bind(&Track::send,
                                            this,
                                            placeholders::_1);
