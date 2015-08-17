@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <algorithm>
 #include <memory>
 #include <alsa/asoundlib.h>
 
@@ -12,12 +13,9 @@ using namespace std;
 
 const int TICKS_PER_BEAT = 24;
 
-class MidiDevice : public Clocked
+class MidiDevice
 {
-private:
-  snd_rawmidi_t *handle_in = 0;
-  snd_rawmidi_t *handle_out = 0;
-
+protected:
   enum : uint8_t
   {
     MIDI_NOTE_ON = 0x90,
@@ -25,24 +23,32 @@ private:
     MIDI_CONTROL = 0xB0,
   };
 
-  unordered_map<uint8_t, shared_ptr<NoteOnEvent>> open_notes;
-
 public:
   string device_id;
 
   MidiDevice(string id) : device_id(id)
   {
-    int err {snd_rawmidi_open(&handle_in, &handle_out, device_id.c_str(), 0)};
+  }
+};
+
+class MidiInputDevice : public MidiDevice, public Clocked
+{
+private:
+  snd_rawmidi_t *handle_in = 0;
+  unordered_map<uint8_t, shared_ptr<NoteOnEvent>> open_notes;
+
+public:
+  MidiInputDevice(string id) : MidiDevice(id)
+  {
+    int err {snd_rawmidi_open(&handle_in, NULL, device_id.c_str(), 0)};
     if ( err )
-      throw runtime_error{"snd_rawmidi_open failed for " + device_id};
+      throw runtime_error{"input snd_rawmidi_open failed for " + device_id};
   }
 
-  ~MidiDevice()
+  ~MidiInputDevice()
   {
     snd_rawmidi_drain(handle_in);
     snd_rawmidi_close(handle_in);
-    snd_rawmidi_drain(handle_out);
-    snd_rawmidi_close(handle_out);
   }
 
   shared_ptr<Event> read()
@@ -58,7 +64,7 @@ public:
         if ( buffer_in[2] )
         {
           note_on = shared_ptr<NoteOnEvent>(new NoteOnEvent { buffer_in[1], buffer_in[2] });
-          open_notes[buffer_in[1]] = note_on;
+          open_notes.emplace(buffer_in[1], note_on);
           return note_on;
         }
         else
@@ -79,6 +85,47 @@ public:
       default:
         return shared_ptr<Event>(new Event {});
     }
+  }
+
+  void start()
+  {
+  }
+
+  void stop()
+  {
+  }
+
+  void tick()
+  {
+    // increment open notes
+    for_each(open_notes.begin(), open_notes.end(),
+         [](pair<const uint8_t, shared_ptr<NoteOnEvent>> &open_note_pair)
+         {
+            open_note_pair.second->length ++;
+         }
+      );
+  }
+};
+
+
+
+class MidiOutputDevice : public MidiDevice, public Clocked
+{
+private:
+  snd_rawmidi_t *handle_out = 0;
+
+public:
+  MidiOutputDevice(string id) : MidiDevice(id)
+  {
+    int err {snd_rawmidi_open(NULL, &handle_out, device_id.c_str(), 0)};
+    if ( err )
+      throw runtime_error{"output snd_rawmidi_open failed for " + device_id};
+  }
+
+  ~MidiOutputDevice()
+  {
+    snd_rawmidi_drain(handle_out);
+    snd_rawmidi_close(handle_out);
   }
 
   void write(const uint8_t channel, const NoteOnEvent &event) const

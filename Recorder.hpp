@@ -9,7 +9,7 @@ private:
   Clip *active_clip;
   Track *active_track;
 
-  list<shared_ptr<MidiDevice>> devices;
+  list<shared_ptr<MidiInputDevice>> devices;
 public:
   Recorder() : active_clip{nullptr}, active_track{nullptr}
   {
@@ -40,21 +40,21 @@ public:
     return active_track;
   }
 
-  void addDevice(shared_ptr<MidiDevice> device)
+  void addDevice(shared_ptr<MidiInputDevice> device)
   {
     devices.push_back(device);
   }
 
   void start()
   {
-    for ( shared_ptr<MidiDevice> device : devices )
+    for ( shared_ptr<MidiInputDevice> device : devices )
     {
       thread t(Recorder::read, ref(*this), device);
       t.detach();
     }
   }
 
-  static void read(Recorder &recorder, shared_ptr<MidiDevice> device)
+  static void read(Recorder &recorder, shared_ptr<MidiInputDevice> device)
   {
     while ( true )
     {

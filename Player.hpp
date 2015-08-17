@@ -2,7 +2,7 @@
 #include <cmath>
 #include <thread>
 #include <chrono>
-#include <list>
+#include <unordered_set>
 
 #include "Clocked.hpp"
 
@@ -11,12 +11,12 @@ class Player
 private:
   double BPM = 120.0;
   bool playing = false;
-  list<shared_ptr<Clocked>> clock_receivers;
+  unordered_set<shared_ptr<Clocked>> clock_receivers;
  
 public:
   void addClockReceiver(shared_ptr<Clocked> receiver)
   {
-    clock_receivers.push_back(receiver);
+    clock_receivers.emplace(receiver);
   }
 
   double getBPM() const

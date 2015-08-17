@@ -5,20 +5,13 @@ using namespace std;
 
 struct Event
 {
-  virtual ~Event()
-  {
-  }
-};
-
-struct TimedEvent
-{
   int time;
 
-  TimedEvent(int t) : time{t}
+  Event() : time{0}
   {
   }
 
-  virtual ~TimedEvent()
+  virtual ~Event()
   {
   }
 };
@@ -27,24 +20,10 @@ struct NoteOnEvent : Event
 {
   uint8_t note;
   uint8_t velocity;
-
-  NoteOnEvent(uint8_t n, uint8_t v)
-    : note{n}, velocity{v}
-  {
-  }
-
-  NoteOnEvent(const NoteOnEvent &note_on)
-    : note{note_on.note}, velocity{note_on.velocity}
-  {
-  }
-};
-
-struct TimedNoteOnEvent : NoteOnEvent, TimedEvent
-{
   int length;
 
-  TimedNoteOnEvent(int t, NoteOnEvent &note_on)
-    : NoteOnEvent{note_on}, TimedEvent{t}, length{0}
+  NoteOnEvent(uint8_t n, uint8_t v)
+    : note{n}, velocity{v}, length{0}
   {
   }
 };

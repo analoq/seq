@@ -36,28 +36,34 @@ public:
     doc >> root;
 
     // get devices
-    map<string, shared_ptr<MidiDevice>> devices;
-    for ( Json::ValueIterator it = root["devices"].begin();
-          it != root["devices"].end();
+    map<string, shared_ptr<MidiInputDevice>> input_devices;
+    for ( Json::ValueIterator it = root["input_devices"].begin();
+          it != root["input_devices"].end();
           ++ it )
     {
       string device_name { it.key().asString() };
       string device_id { (*it).asString() };
-      devices[device_name] = shared_ptr<MidiDevice>(new MidiDevice {device_id});
+      input_devices[device_name] = shared_ptr<MidiInputDevice>(new MidiInputDevice {device_id});
+
+      recorder.addDevice( input_devices[device_name] );
+      player.addClockReceiver( input_devices[device_name] );
     }
 
-    // get input devices
-    for ( Json::Value node : root["input_devices"] )
+    map<string, shared_ptr<MidiOutputDevice>> output_devices;
+    for ( Json::ValueIterator it = root["output_devices"].begin();
+          it != root["output_devices"].end();
+          ++ it )
     {
-      string device_name { node.asString() };
-      recorder.addDevice( devices[device_name] );
+      string device_name { it.key().asString() };
+      string device_id { (*it).asString() };
+      output_devices[device_name] = shared_ptr<MidiOutputDevice>(new MidiOutputDevice {device_id});
     }
 
     // get clock devices
     for ( Json::Value node : root["clock_devices"] )
     {
       string device_name { node.asString() };
-      player.addClockReceiver( devices[device_name] );
+      player.addClockReceiver( output_devices[device_name] );
     }
 
     // get tempo
@@ -75,7 +81,7 @@ public:
       uint8_t program { static_cast<uint8_t>(node["program"].asInt()) };
       uint8_t volume { static_cast<uint8_t>(node["volume"].asInt()) };
 
-      auto track = shared_ptr<Track>(new Track {devices[device_name], channel, name});
+      auto track = shared_ptr<Track>(new Track {output_devices[device_name], channel, name});
       track->setPatch(msb, lsb, program);
       track->setVolume(volume);
       tracks.push_back(track);

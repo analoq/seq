@@ -1,6 +1,6 @@
 {
-  "devices": {"triton": "hw:2,0,0", "omni": "hw:2,0,8"},
-  "input_devices": ["triton"],
+  "input_devices": {"triton": "hw:2,0,0"},
+  "output_devices": {"triton": "hw:2,0,0", "omni": "hw:2,0,8"},
   "clock_devices": ["omni"],
 
   "tempo": 100.0,
