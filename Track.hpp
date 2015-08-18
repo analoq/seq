@@ -7,6 +7,7 @@
 #include "Clip.hpp"
 #include "Event.hpp"
 #include "Clocked.hpp"
+#include "Plugin.hpp"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ private:
   shared_ptr<MidiOutputDevice> device;
 
   list<NoteOnEvent> playing_notes;
-
+  list<Plugin> plugins;
   vector<Clip> clips { Clip{8}, Clip{8}, Clip{8} };
 public:
   Track(shared_ptr<MidiOutputDevice> d, uint8_t c, string n)
@@ -65,13 +66,17 @@ public:
 
   void send(const Event &event)
   {
-    (*device).write(channel, event);
     if ( typeid(event) == typeid(NoteOnEvent) )
     {
-      const NoteOnEvent &note_on = static_cast<const NoteOnEvent &>(event);
+      NoteOnEvent note_on { static_cast<const NoteOnEvent &>(event) };
       if ( note_on.length )
         playing_notes.push_back(note_on);
+      for ( Plugin &plugin : plugins )
+        plugin.process(note_on);
+      (*device).write(channel, note_on);
     }
+    else
+      (*device).write(channel, event);
   }
 
   void start()
@@ -107,6 +112,9 @@ public:
                                            placeholders::_1);
     for ( Clip &clip : clips )
       clip.tick( f );
+
+    for ( Plugin &plugin : plugins )
+      plugin.tick( f );
   }
 };
 
