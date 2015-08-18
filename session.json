@@ -1,9 +1,28 @@
 {
-  "input_devices": {"triton": "hw:2,0,0"},
-  "output_devices": {"triton": "hw:2,0,0", "omni": "hw:2,0,8"},
+  "input_devices": [
+    {
+      "name": "triton",
+      "id": "hw:2,0,0"
+    }
+  ],
+  "output_devices": [
+    {
+      "name": "triton",
+      "id": "hw:2,0,0"
+    },
+    {
+      "name": "omni",
+      "id": "hw:2,0,8"
+    }
+  ],
   "clock_devices": ["omni"],
-
   "tempo": 100.0,
+  "plugins": [
+    {
+      "name": "transposer",
+      "id": "transpose"
+    }
+  ],
   "tracks": [
     {
       "name": "Piano",
@@ -12,7 +31,8 @@
       "msb": 63,
       "lsb": 0,
       "program": 1,
-      "volume": 127
+      "volume": 127,
+      "plugins": ["transposer"]
     },
     {
       "name": "Strings",

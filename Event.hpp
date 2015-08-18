@@ -35,6 +35,11 @@ struct NoteOffEvent : Event
   NoteOffEvent(shared_ptr<NoteOnEvent> n) : note_on{n}
   {
   }
+
+  NoteOffEvent(const NoteOffEvent &note_off)
+    : note_on { shared_ptr<NoteOnEvent>(new NoteOnEvent{*note_off.note_on}) }
+  {
+  }
 };
 
 struct ControlEvent : Event

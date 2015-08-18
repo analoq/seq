@@ -19,7 +19,7 @@ private:
   shared_ptr<MidiOutputDevice> device;
 
   list<NoteOnEvent> playing_notes;
-  list<Plugin> plugins;
+  list<shared_ptr<Plugin>> plugins;
   vector<Clip> clips { Clip{8}, Clip{8}, Clip{8} };
 public:
   Track(shared_ptr<MidiOutputDevice> d, uint8_t c, string n)
@@ -52,6 +52,11 @@ public:
     return clips.size();
   }
 
+  void addPlugin(shared_ptr<Plugin> plugin)
+  {
+    plugins.push_back(plugin);
+  }
+
   void setPatch(const uint8_t msb, const uint8_t lsb, const uint8_t program)
   {
     (*device).write(channel, PatchEvent {msb, lsb, program});
@@ -71,9 +76,16 @@ public:
       NoteOnEvent note_on { static_cast<const NoteOnEvent &>(event) };
       if ( note_on.length )
         playing_notes.push_back(note_on);
-      for ( Plugin &plugin : plugins )
-        plugin.process(note_on);
+      for ( shared_ptr<Plugin> plugin : plugins )
+        plugin->process(note_on);
       (*device).write(channel, note_on);
+    }
+    else if ( typeid(event) == typeid(NoteOffEvent) )
+    {
+      NoteOffEvent note_off { static_cast<const NoteOffEvent &>(event) };
+      for ( shared_ptr<Plugin> plugin : plugins )
+        plugin->process(*note_off.note_on);
+      (*device).write(channel, note_off);
     }
     else
       (*device).write(channel, event);
@@ -112,9 +124,6 @@ public:
                                            placeholders::_1);
     for ( Clip &clip : clips )
       clip.tick( f );
-
-    for ( Plugin &plugin : plugins )
-      plugin.tick( f );
   }
 };
 
