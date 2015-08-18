@@ -43,7 +43,7 @@ public:
     {
       string device_name { it.key().asString() };
       string device_id { (*it).asString() };
-      input_devices[device_name] = shared_ptr<MidiInputDevice>(new MidiInputDevice {device_id});
+      input_devices[device_name] = shared_ptr<MidiInputDevice>(new MidiInputDevice {device_id, device_name});
 
       recorder.addDevice( input_devices[device_name] );
       player.addClockReceiver( input_devices[device_name] );
@@ -56,7 +56,7 @@ public:
     {
       string device_name { it.key().asString() };
       string device_id { (*it).asString() };
-      output_devices[device_name] = shared_ptr<MidiOutputDevice>(new MidiOutputDevice {device_id});
+      output_devices[device_name] = shared_ptr<MidiOutputDevice>(new MidiOutputDevice {device_id, device_name});
     }
 
     // get clock devices

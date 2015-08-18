@@ -24,9 +24,9 @@ protected:
   };
 
 public:
-  string device_id;
+  string device_name;
 
-  MidiDevice(string id) : device_id(id)
+  MidiDevice(string name) : device_name(name)
   {
   }
 };
@@ -38,11 +38,11 @@ private:
   unordered_map<uint8_t, shared_ptr<NoteOnEvent>> open_notes;
 
 public:
-  MidiInputDevice(string id) : MidiDevice(id)
+  MidiInputDevice(string id, string name) : MidiDevice(name)
   {
-    int err {snd_rawmidi_open(&handle_in, NULL, device_id.c_str(), 0)};
+    int err {snd_rawmidi_open(&handle_in, NULL, id.c_str(), 0)};
     if ( err )
-      throw runtime_error{"input snd_rawmidi_open failed for " + device_id};
+      throw runtime_error{"input snd_rawmidi_open failed for " + id};
   }
 
   ~MidiInputDevice()
@@ -115,11 +115,11 @@ private:
   snd_rawmidi_t *handle_out = 0;
 
 public:
-  MidiOutputDevice(string id) : MidiDevice(id)
+  MidiOutputDevice(string id, string name) : MidiDevice(name)
   {
-    int err {snd_rawmidi_open(NULL, &handle_out, device_id.c_str(), 0)};
+    int err {snd_rawmidi_open(NULL, &handle_out, id.c_str(), 0)};
     if ( err )
-      throw runtime_error{"output snd_rawmidi_open failed for " + device_id};
+      throw runtime_error{"output snd_rawmidi_open failed for " + id};
   }
 
   ~MidiOutputDevice()

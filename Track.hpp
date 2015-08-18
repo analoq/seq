@@ -39,7 +39,7 @@ public:
 
   string getDeviceName() const
   {
-    return (*device).device_id;
+    return (*device).device_name;
   }
 
   Clip &getClip(const int index)
