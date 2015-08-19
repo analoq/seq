@@ -13,6 +13,6 @@ class TransposePlugin : public Plugin
 
   void process(NoteOnEvent &note_on)
   {
-    note_on.note += transpose;
+    note_on.transpose = transpose;
   }
 };

@@ -69,26 +69,17 @@ public:
                                    volume });
   }
 
-  void send(const Event &event)
+  void send(Event &event)
   {
     if ( typeid(event) == typeid(NoteOnEvent) )
     {
-      NoteOnEvent note_on { static_cast<const NoteOnEvent &>(event) };
-      if ( note_on.length )
-        playing_notes.push_back(note_on);
+      NoteOnEvent &note_on = dynamic_cast<NoteOnEvent &>(event);
       for ( shared_ptr<Plugin> plugin : plugins )
         plugin->process(note_on);
-      (*device).write(channel, note_on);
+      if ( note_on.length )
+        playing_notes.push_back(note_on);
     }
-    else if ( typeid(event) == typeid(NoteOffEvent) )
-    {
-      NoteOffEvent note_off { static_cast<const NoteOffEvent &>(event) };
-      for ( shared_ptr<Plugin> plugin : plugins )
-        plugin->process(*note_off.note_on);
-      (*device).write(channel, note_off);
-    }
-    else
-      (*device).write(channel, event);
+    (*device).write(channel, event);
   }
 
   void start()
@@ -112,16 +103,17 @@ public:
 
       if ( !playing_note.length )
       {
-        send(NoteOffEvent(shared_ptr<NoteOnEvent>(new NoteOnEvent {playing_note})) );
+        NoteOffEvent note_off { shared_ptr<NoteOnEvent>(new NoteOnEvent {playing_note}) };
+        send(note_off);
         pnit = playing_notes.erase(pnit);
       }
       else
         ++pnit;
     }
 
-    function<void(const Event &)> f = bind(&Track::send,
-                                           this,
-                                           placeholders::_1);
+    function<void(Event &)> f = bind(&Track::send,
+                                     this,
+                                     placeholders::_1);
     for ( Clip &clip : clips )
       clip.tick( f );
   }

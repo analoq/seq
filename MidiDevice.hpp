@@ -133,7 +133,7 @@ public:
     uint8_t buffer[]
     {
       static_cast<uint8_t>(MIDI_NOTE_ON | channel),
-      event.note,
+      event.note + event.transpose,
       event.velocity
     };
     snd_rawmidi_write(handle_out, buffer, 3);
@@ -144,7 +144,7 @@ public:
     unsigned char buffer[]
     {
       static_cast<uint8_t>(MIDI_NOTE_OFF | channel),
-      (*event.note_on).note,
+      event.note_on->note + event.note_on->transpose,
       0
     };
     snd_rawmidi_write(handle_out, buffer, 3);

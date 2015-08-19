@@ -21,9 +21,10 @@ struct NoteOnEvent : Event
   uint8_t note;
   uint8_t velocity;
   int length;
+  int8_t transpose;
 
   NoteOnEvent(uint8_t n, uint8_t v)
-    : note{n}, velocity{v}, length{0}
+    : note{n}, velocity{v}, length{0}, transpose{0}
   {
   }
 };
@@ -33,11 +34,6 @@ struct NoteOffEvent : Event
   shared_ptr<NoteOnEvent> note_on;
 
   NoteOffEvent(shared_ptr<NoteOnEvent> n) : note_on{n}
-  {
-  }
-
-  NoteOffEvent(const NoteOffEvent &note_off)
-    : note_on { shared_ptr<NoteOnEvent>(new NoteOnEvent{*note_off.note_on}) }
   {
   }
 };
